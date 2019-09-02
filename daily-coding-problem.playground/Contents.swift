@@ -100,3 +100,147 @@ extension Array where Element == Int {
 }
 
 ExludingProductTestCase.defaultTestSuite.run()
+
+
+/*
+ DAY 03:
+ 
+ Good morning! Here's your coding interview problem for today.
+ 
+ This problem was asked by Google.
+ 
+ Given the root to a binary tree, implement serialize(root), which serializes the tree into a string, and deserialize(s), which deserializes the string back into the tree.
+ 
+ For example, given the following Node class
+ 
+ class Node:
+    def __init__(self, val, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+ 
+ The following test should pass:
+
+ node = Node('root', Node('left', Node('left.left')), Node('right'))
+ assert deserialize(serialize(node)).left.left.val == 'left.left'
+*/
+
+class NodeSeralizationTestCase: XCTestCase {
+    func testNodeSerialization() {
+        let node = Node(
+            val: "root",
+            left: Node(val: "left", left: Node(val: "left.left")),
+            right: Node(val: "right")
+        )
+        XCTAssertEqual(deserialize(serialize(node)).left!.left!.val, "left.left")
+    }
+    
+    func testSerialize() {
+        let node = Node(val: "root")
+        XCTAssertEqual(serialize(node), "{ \"val\": \"root\", \"left\": null, \"right\": null }")
+    }
+    
+    func testSerializeWithChildren() {
+        let node = Node(val: "root", left: Node(val: "left"), right: Node(val: "right"))
+        XCTAssertEqual(serialize(node), "{ \"val\": \"root\", \"left\": { \"val\": \"left\", \"left\": null, \"right\": null }, \"right\": { \"val\": \"right\", \"left\": null, \"right\": null } }")
+    }
+    
+    func testEquality() {
+        let node1 = Node(val: "root", left: Node(val: "left"), right: Node(val: "right"))
+        let node2 = Node(val: "root", left: Node(val: "left"), right: Node(val: "right"))
+        XCTAssertEqual(node1, node2)
+    }
+    
+    func testInequality() {
+        let node1 = Node(val: "root", left: Node(val: "left"), right: Node(val: "right"))
+        let node2 = Node(val: "root", left: Node(val: "left2"), right: Node(val: "right"))
+        XCTAssertNotEqual(node1, node2)
+    }
+    
+    func testDeserialize() {
+        let serializedNode = "{ \"val\": \"root\", \"left\": null, \"right\": null }"
+        XCTAssertEqual(deserialize(serializedNode), Node(val: "root"))
+    }
+}
+
+class Node: Codable {
+    var val: String
+    var left: Node?
+    var right: Node?
+    
+    init(val: String, left: Node? = nil, right: Node? = nil) {
+        self.val = val
+        self.left = left
+        self.right = right
+    }
+}
+
+extension Node: Equatable {
+    static func == (lhs: Node, rhs: Node) -> Bool {
+        return Node.compareNodes(lhs, nodeB: rhs)
+    }
+    
+    private static func compareNodes(_ nodeA: Node?, nodeB: Node?) -> Bool {
+        if nodeA == nil && nodeB == nil {
+            return true
+        } else {
+            guard let nodeA = nodeA, let nodeB = nodeB else { return false }
+            
+            guard nodeA.val == nodeB.val else { return false }
+            
+            guard compareNodes(nodeA.left, nodeB: nodeB.left) else { return false }
+            
+            guard compareNodes(nodeA.right, nodeB: nodeB.right) else { return false }
+            
+            return true
+        }
+    }
+}
+
+func deserialize(_ nodeString: String) -> Node {
+    do {
+        let nodeData = nodeString.data(using: .utf8)!
+        let node = try JSONDecoder().decode(Node.self, from: nodeData)
+        return node
+    } catch {
+        fatalError(error.localizedDescription)
+    }
+}
+
+func serialize(_ node: Node) -> String {
+    return "{ \"val\": \"\(node.val)\", \"left\": \(node.left.map(serialize) ?? "null"), \"right\": \(node.right.map(serialize) ?? "null") }"
+}
+
+NodeSeralizationTestCase.defaultTestSuite.run()
+
+
+/*
+ Day 04:
+ 
+ This problem was asked by Stripe.
+ 
+ Given an array of integers, find the first missing positive integer in linear time and constant space. In other words, find the lowest positive integer that does not exist in the array. The array can contain duplicates and negative numbers as well.
+ 
+ For example, the input [3, 4, -1, 1] should give 2. The input [1, 2, 0] should give 3.
+ 
+ You can modify the input array in-place.
+*/
+
+class MissingIntTestCase: XCTestCase {
+    func testMissingMinInt() {
+        XCTAssertEqual([3, 4, -1, 1].missingMinInt(), 2)
+        XCTAssertEqual([1, 2, 0].missingMinInt(), 3)
+    }
+}
+
+extension Array where Element == Int {
+    func missingMinInt() -> Int {
+        var minInts = Set<Int>(1...self.count)
+        for element in self {
+            if minInts.contains(element) { minInts.remove(element) }
+        }
+        return minInts.min() ?? self.count + 1
+    }
+}
+
+MissingIntTestCase.defaultTestSuite.run()
