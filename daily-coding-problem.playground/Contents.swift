@@ -244,3 +244,49 @@ extension Array where Element == Int {
 }
 
 MissingIntTestCase.defaultTestSuite.run()
+
+
+/*
+ Day 05:
+ 
+ This problem was asked by Jane Street.
+ 
+ cons(a, b) constructs a pair, and fst(pair) and lst(pair) returns the first and last element of that pair.
+ For example, fst(cons(3, 4)) returns 3, and lst(cons(3, 4)) returns 4.
+ 
+ Given this implementation of cons:
+ 
+ def cons(a, b):
+    def pair(f):
+        return f(a, b)
+    return pair
+
+ Implement fst and lst.
+*/
+
+class ConsTestCase: XCTestCase {
+    func testFst() {
+        XCTAssertEqual(fst(cons(3, 4)), 3)
+    }
+    
+    func testLst() {
+        XCTAssertEqual(lst(cons(3, 4)), 4)
+    }
+}
+
+func cons(_ a: Int, _ b: Int) -> ((Int, Int) -> Int) -> Int {
+    func pair(f: (Int, Int) -> Int) -> Int {
+        return f(a, b)
+    }
+    return pair
+}
+
+func fst(_ p: ((Int, Int) -> Int) -> Int) -> Int {
+    return p({ a, b in return a })
+}
+
+func lst(_ p: ((Int, Int) -> Int) -> Int) -> Int {
+    return p({ a, b in return b })
+}
+
+ConsTestCase.defaultTestSuite.run()
