@@ -290,3 +290,42 @@ func lst(_ p: ((Int, Int) -> Int) -> Int) -> Int {
 }
 
 ConsTestCase.defaultTestSuite.run()
+
+
+/*
+ Day 07:
+ 
+ This problem was asked by Facebook.
+ 
+ Given the mapping a = 1, b = 2, ... z = 26, and an encoded message, count the number of ways it can be decoded.
+ 
+ For example, the message '111' would give 3, since it could be decoded as 'aaa', 'ka', and 'ak'.
+ 
+ You can assume that the messages are decodable. For example, '001' is not allowed.
+*/
+
+class PossibleDecodingTestCase: XCTestCase {
+    func testCountPossibleDecodings() {
+        XCTAssertEqual(countPossibleDecoding("111"), 3)
+        XCTAssertEqual(countPossibleDecoding("11"), 2)
+        XCTAssertEqual(countPossibleDecoding("1"), 1)
+    }
+}
+
+func countPossibleDecoding(_ encoded: String) -> Int {
+    var possibleDecodings = 1
+    
+    var previousChar: Character?
+    for char in encoded {
+        // Check if combining with previous char makes a valid encoded letter (2 digits)
+        if let previousChar = previousChar, let possibleEncoding = Int("\(previousChar)\(char)") {
+            if (10...26).contains(possibleEncoding) { possibleDecodings += 1 }
+        }
+        
+        previousChar = char
+    }
+    
+    return possibleDecodings
+}
+
+PossibleDecodingTestCase.defaultTestSuite.run()
