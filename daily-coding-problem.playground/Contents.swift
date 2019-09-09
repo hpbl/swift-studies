@@ -417,16 +417,16 @@ extension Node {
     }
     
     private func areSubtreesEqual(parentNodeVal: String? = nil) -> Bool {
-        if let parentNodeVal = parentNodeVal {
-            if parentNodeVal == self.val {
-                return true
-                    && self.left?.areSubtreesEqual(parentNodeVal: self.val) ?? true
-                    && self.right?.areSubtreesEqual(parentNodeVal: self.val) ?? true
-            } else {
-                return false
-            }
+        guard let parentNodeVal = parentNodeVal else {
+            return true
+                && self.left?.areSubtreesEqual(parentNodeVal: self.val) ?? true
+                && self.right?.areSubtreesEqual(parentNodeVal: self.val) ?? true
         }
         
+        guard parentNodeVal == self.val else {
+            return false
+        }
+
         return true
             && self.left?.areSubtreesEqual(parentNodeVal: self.val) ?? true
             && self.right?.areSubtreesEqual(parentNodeVal: self.val) ?? true
