@@ -406,21 +406,22 @@ class UnivalTreeTestCase: XCTestCase {
 }
 
 extension Node {
-    func countUnivalSubtrees(parentNode: Node? = nil) -> Int {
-        let count  = self.areSubtreesEqual()
+    // O(nˆ2)
+    func poor_countUnivalSubtrees(parentNode: Node? = nil) -> Int {
+        let count  = self.poor_areSubtreesEqual()
             ? 1
             : 0
         
         return count
-            + (self.left?.countUnivalSubtrees() ?? 0)
-            + (self.right?.countUnivalSubtrees() ?? 0)
+            + (self.left?.poor_countUnivalSubtrees() ?? 0)
+            + (self.right?.poor_countUnivalSubtrees() ?? 0)
     }
     
-    private func areSubtreesEqual(parentNodeVal: String? = nil) -> Bool {
+    private func poor_areSubtreesEqual(parentNodeVal: String? = nil) -> Bool {
         guard let parentNodeVal = parentNodeVal else {
             return true
-                && self.left?.areSubtreesEqual(parentNodeVal: self.val) ?? true
-                && self.right?.areSubtreesEqual(parentNodeVal: self.val) ?? true
+                && self.left?.poor_areSubtreesEqual(parentNodeVal: self.val) ?? true
+                && self.right?.poor_areSubtreesEqual(parentNodeVal: self.val) ?? true
         }
         
         guard parentNodeVal == self.val else {
@@ -428,8 +429,36 @@ extension Node {
         }
 
         return true
-            && self.left?.areSubtreesEqual(parentNodeVal: self.val) ?? true
-            && self.right?.areSubtreesEqual(parentNodeVal: self.val) ?? true
+            && self.left?.poor_areSubtreesEqual(parentNodeVal: self.val) ?? true
+            && self.right?.poor_areSubtreesEqual(parentNodeVal: self.val) ?? true
+    }
+    
+    // O(n)
+    func countUnivalSubtrees() -> Int {
+        let (count, _) = Node.univalHelper(root: self)
+        return count
+    }
+    
+    static private func univalHelper(root: Node?) -> (Int, Bool) {
+        guard let root = root else {
+            return (0, true)
+        }
+        
+        let (leftCount, isLeftUnival) = Node.univalHelper(root: root.left)
+        let (rightCount, isRightUnival) = Node.univalHelper(root: root.right)
+        
+        var isRootUnival = isLeftUnival && isRightUnival
+        
+        if root.left != nil && root.left!.val != root.val {
+            isRootUnival = false
+        }
+        if root.right != nil && root.right!.val != root.val {
+            isRootUnival = false
+        }
+        
+        let totalCount = leftCount + rightCount + (isRootUnival ? 1 : 0)
+        
+        return (totalCount, isRootUnival)
     }
 }
 
