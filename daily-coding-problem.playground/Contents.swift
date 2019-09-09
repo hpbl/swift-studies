@@ -329,3 +329,108 @@ func countPossibleDecoding(_ encoded: String) -> Int {
 }
 
 PossibleDecodingTestCase.defaultTestSuite.run()
+
+
+/*
+ Day 08:
+ 
+ This problem was asked by Google.
+ 
+ A unival tree (which stands for "universal value") is a tree where all nodes under it have the same value.
+ 
+ Given the root to a binary tree, count the number of unival subtrees.
+ 
+ For example, the following tree has 5 unival subtrees:
+      0
+     / \
+    1   0
+       / \
+      1   0
+     / \
+    1   1
+*/
+
+
+class UnivalTreeTestCase: XCTestCase {
+    func testCountUnivalSubtreesLeaf() {
+        let root = Node(val: "1")
+        
+        XCTAssertEqual(root.countUnivalSubtrees(), 1)
+    }
+    
+    func testCountUnivalSubtreesNoRight() {
+        let root = Node(
+            val: "1",
+            left: Node(val: "1")
+        )
+        
+        XCTAssertEqual(root.countUnivalSubtrees(), 2)
+    }
+    
+    func testCountUnivalSubtreesNoLeft() {
+        let root = Node(
+            val: "1",
+            right: Node(val: "1")
+        )
+        
+        XCTAssertEqual(root.countUnivalSubtrees(), 2)
+    }
+    
+    func testCountUnivalSubtreesSimpleTree() {
+        let root = Node(
+            val: "1",
+            left: Node(val: "1"),
+            right: Node(val: "1")
+        )
+        
+        XCTAssertEqual(root.countUnivalSubtrees(), 3)
+    }
+    
+    func testCountUnivalSubtreesComplexTree() {
+        let root = Node(
+            val: "0",
+            left: Node(val: "1"),
+            right: Node(
+                val: "0",
+                left: Node(
+                    val: "1",
+                    left: Node(val: "1"),
+                    right: Node(val: "1")
+                ),
+                right: Node(val: "0")
+            )
+        )
+
+        XCTAssertEqual(root.countUnivalSubtrees(), 5)
+    }
+}
+
+extension Node {
+    func countUnivalSubtrees(parentNode: Node? = nil) -> Int {
+        let count  = self.areSubtreesEqual()
+            ? 1
+            : 0
+        
+        return count
+            + (self.left?.countUnivalSubtrees() ?? 0)
+            + (self.right?.countUnivalSubtrees() ?? 0)
+    }
+    
+    private func areSubtreesEqual(parentNodeVal: String? = nil) -> Bool {
+        if let parentNodeVal = parentNodeVal {
+            if parentNodeVal == self.val {
+                return true
+                    && self.left?.areSubtreesEqual(parentNodeVal: self.val) ?? true
+                    && self.right?.areSubtreesEqual(parentNodeVal: self.val) ?? true
+            } else {
+                return false
+            }
+        }
+        
+        return true
+            && self.left?.areSubtreesEqual(parentNodeVal: self.val) ?? true
+            && self.right?.areSubtreesEqual(parentNodeVal: self.val) ?? true
+    }
+}
+
+UnivalTreeTestCase.defaultTestSuite.run()
