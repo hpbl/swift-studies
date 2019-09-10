@@ -537,3 +537,33 @@ UnivalTreeTestCase.defaultTestSuite.run()
  
  Follow-up: Can you do this in O(N) time and constant space?
 */
+
+class LargestNonAdjSumTestCase: XCTestCase {
+    func testLargestNonAdjSum_13() {
+        XCTAssertEqual([2, 4, 6, 2, 5].largestNonAdjSum(), 13)
+    }
+    
+    func testLargestNonAdjSum_10() {
+        XCTAssertEqual([5, 1, 1, 5].largestNonAdjSum(), 10)
+    }
+}
+
+extension Array where Element == Int {
+    func largestNonAdjSum() -> Int {
+        var incl = 0
+        var excl = 0
+        
+        for element in self {
+            // Current max excluding element
+            let newExcl = Swift.max(incl, excl)
+            
+            // Current max including element
+            incl = excl + element
+            excl = newExcl
+        }
+        
+        return Swift.max(incl, excl)
+    }
+}
+
+LargestNonAdjSumTestCase.defaultTestSuite.run()
