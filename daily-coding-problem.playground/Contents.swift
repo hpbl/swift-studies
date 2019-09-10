@@ -227,19 +227,81 @@ NodeSeralizationTestCase.defaultTestSuite.run()
 */
 
 class MissingIntTestCase: XCTestCase {
-    func testMissingMinInt() {
-        XCTAssertEqual([3, 4, -1, 1].missingMinInt(), 2)
-        XCTAssertEqual([1, 2, 0].missingMinInt(), 3)
+    func testMissingInt_positiveArr() {
+        var arr = [1, 2, 4]
+        XCTAssertEqual(arr.missingMinInt(), 3)
+    }
+    
+    func testMissingMinInt_arrWithNegative() {
+        var arr1 = [3, 4, -1, 1]
+        XCTAssertEqual(arr1.missingMinInt(), 2)
+    }
+    
+    func testMissingInt_arrWithZero() {
+        var arr2 = [1, 2, 0]
+        XCTAssertEqual(arr2.missingMinInt(), 3)
+    }
+    
+    func testShiftLeftNonPositives() {
+        var arr = [1, 2, -1]
+        arr.shiftLeftNonPositives()
+        XCTAssertEqual(arr, [-1, 2, 1])
+    }
+    
+    func testShiftLeftNonPositives_threeNegatives() {
+        var arr = [-1, 1, 2, -2, -3]
+        arr.shiftLeftNonPositives()
+        XCTAssertEqual(arr, [-1, -2, -3, 1, 2])
     }
 }
 
 extension Array where Element == Int {
-    func missingMinInt() -> Int {
+    // Space: O(n)
+    func poor_missingMinInt() -> Int {
         var minInts = Set<Int>(1...self.count)
         for element in self {
             if minInts.contains(element) { minInts.remove(element) }
         }
         return minInts.min() ?? self.count + 1
+    }
+    
+    // Space: O(1)
+    mutating func shiftLeftNonPositives() -> Int {
+        var firstPositiveIndex = self.count
+        for (index, element) in self.enumerated() {
+            if element > 0 && index < firstPositiveIndex {
+                firstPositiveIndex = index
+                continue
+            }
+            
+            if element <= 0 && index > firstPositiveIndex {
+                self[index] = self[firstPositiveIndex]
+                self[firstPositiveIndex] = element
+                
+                firstPositiveIndex = firstPositiveIndex + 1
+            }
+        }
+        
+        return firstPositiveIndex
+    }
+    
+    mutating func missingMinInt() -> Int {
+        let firstPositiveIndex = self.shiftLeftNonPositives()
+        
+        for index in firstPositiveIndex..<self.count {
+            let absElement = abs(self[index])
+            if (absElement - 1 < self.count && self[absElement - 1] > 0) {
+                self[absElement - 1] = -self[absElement - 1]
+            }
+        }
+        
+        for (index, element) in self.enumerated() {
+            if element > 0 {
+                return index + 1
+            }
+        }
+        
+        return self.count + 1
     }
 }
 
